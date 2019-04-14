@@ -78,5 +78,5 @@ class MinGen:
             x_1 = self._get_objects_by_char(char)
             x_2_lst = self._get_x_2_lst_from_objects(x_1)
             x_2 = self._chars_from_list(x_2_lst)
-            prom_tab.append(PromRow(char, lst, True, x_1, x_2, x_2_lst))
+            prom_tab.append(PromRow(char, lst, True, x_2, x_1, x_2, x_2_lst))
         return prom_tab
