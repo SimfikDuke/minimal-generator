@@ -6,8 +6,8 @@ from typing import List
 class PromRow:
     X_name: str
     X_lst: List[int]
-    Key: bool
     X_Apr: str
     X_1: List[int]
     X_2: str
     X_2_lst: List[int]
+    Key: bool = True
