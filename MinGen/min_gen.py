@@ -35,15 +35,6 @@ class MinGen:
         data_to_print = [['X', 'K', 'X\'', 'X"']]
         for i in self.prom_tab:
             data_to_print.append([i.X_name, '+' if i.Key else '-', ''.join([str(j) for j in i.X_1]), i.X_2])
-        # print('      '.join(['X', 'K', 'X\'' + ' ' * (self.objects_count - 2), 'X"']))
-        # for prom_row in self.prom_tab:
-        #     print('      '.join([
-        #         prom_row.X_name,
-        #         '+' if prom_row.Key else '-',
-        #         ''.join([str(i) for i in prom_row.X_1]) +
-        #         ' ' * (self.objects_count - len(prom_row.X_1)),
-        #         prom_row.X_2,
-        #     ]))
         for row in data_to_print:
             text = ''
             for i in row:
@@ -79,6 +70,13 @@ class MinGen:
                 res.append(1)
             else:
                 res.append(0)
+        return res
+
+    def _chars_from_str(self, string):
+        res = []
+        for i in self.chars:
+            if i in string:
+                res.append(i)
         return res
 
     def _chars_from_list(self, lst):
@@ -147,7 +145,39 @@ class MinGen:
         while self.it[last_one_index] == '1':
             self._increment_iterator()
 
-    def _is_key(self, x):
+    @staticmethod
+    def _get_sublist(lst):
+        return [[j for j in lst if j != i] for i in lst]
+
+    def _is_equal_names(self, name1, name2):
+        return set(self._chars_from_str(name1)) == set(self._chars_from_str(name2))
+
+    def _name1_contain_name2(self, name1, name2):
+        for char in self._chars_from_str(name2):
+            if char not in name1:
+                return False
+        return True
+
+    def _get_row_by_name(self, row_name):
+        all_known_rows = self.prom_tab + self.result
+        for row in all_known_rows:
+            if self._is_equal_names(row.X_name, row_name):
+                return row
+
+    def _is_key(self, x: str):
+        x_chars = self._chars_from_str(x)
+        if len(x_chars) == 1:
+            return True
+        chars_subsets = self._get_sublist(x_chars)
+        for chars_subset in chars_subsets:
+            substring = ''.join(chars_subset)
+            if not self._is_key(substring):
+                return False
+            substring_row = self._get_row_by_name(substring)
+            if self._name1_contain_name2(substring_row.X_Apr, x):
+                return False
+            if self._name1_contain_name2(substring_row.X_2, x):
+                return False
         return True
 
     def _conflict_trigger(self, x):
@@ -195,10 +225,11 @@ class MinGen:
         ws2 = wb.create_sheet('Auxiliary')
         ws2.append(['X', 'K', 'X+', 'X\'', 'X"'])
         for i in self.prom_tab:
-            ws2.append([i.X_name, '+' if i.Key else '-', i.X_Apr, ''.join(map(str, i.X_1)), i.X_2])
+            ws2.append([i.X_name, '+' if i.Key else '-', i.X_Apr, ''.join(map(str, i.X_1)) if i.X_1 else 'ø',
+                        i.X_2 if i.X_2 else 'ø'])
         ws3 = wb.create_sheet('Output')
         ws3.append(['X', 'X', 'K', 'X+', 'X\'', 'X"'])
         for i in self.result:
             ws3.append([''.join(map(str, i.X_lst)), i.X_name, '+' if i.Key else '-',
-                        i.X_Apr, ''.join(map(str, i.X_1)), i.X_2])
+                        i.X_Apr, ''.join(map(str, i.X_1)) if i.X_1 else 'ø', i.X_2 if i.X_2 else 'ø'])
         wb.save('output.xlsx')
